@@ -12,6 +12,9 @@ import java.nio.file.*;
 import java.util.Map;
 
 import static java.nio.file.StandardOpenOption.*;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Arrays;
+import java.util.HashSet;
 
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INITIALIZE)
 public final class GitHookInstallMojo extends AbstractMojo {
@@ -32,6 +35,7 @@ public final class GitHookInstallMojo extends AbstractMojo {
             String finalScript = SHEBANG + '\n' + hook.getValue();
             try {
                 Files.write(HOOK_DIR_PATH.resolve(hookName), finalScript.getBytes(), CREATE, TRUNCATE_EXISTING);
+                Files.setPosixFilePermissions(HOOK_DIR_PATH.resolve(hookName), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE)));
             } catch (IOException e) {
                 throw new MojoExecutionException("could not write hook with name: " + hookName, e);
             }
