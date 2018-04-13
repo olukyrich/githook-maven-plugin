@@ -40,6 +40,8 @@ To configure hooks provide the following configuration for the execution:
 NOTE: The plugin rewrites hooks.
 
 ## Usage Example
+
+Simple usage with inline script :
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -74,4 +76,17 @@ NOTE: The plugin rewrites hooks.
         </plugins>
     </build>
 </project>
+```
+
+External hook files can also been used :
+```
+...
+<configuration>
+    <hooks>
+        <resourceHooks>
+            <pre-push>hooks/pre-push.sh</pre-push>
+        </resourceHooks>
+    </hooks>
+</configuration>
+...
 ```
