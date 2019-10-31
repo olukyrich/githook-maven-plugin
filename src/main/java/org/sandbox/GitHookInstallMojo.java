@@ -8,10 +8,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
-import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INITIALIZE)
 public final class GitHookInstallMojo extends AbstractMojo {
@@ -31,7 +34,8 @@ public final class GitHookInstallMojo extends AbstractMojo {
             String hookName = hook.getKey();
             String finalScript = SHEBANG + '\n' + hook.getValue();
             try {
-                Files.write(HOOK_DIR_PATH.resolve(hookName), finalScript.getBytes(), CREATE, TRUNCATE_EXISTING);
+                Path script = Files.write(HOOK_DIR_PATH.resolve(hookName), finalScript.getBytes(), CREATE, TRUNCATE_EXISTING);
+                script.toFile().setExecutable(true);
             } catch (IOException e) {
                 throw new MojoExecutionException("could not write hook with name: " + hookName, e);
             }
