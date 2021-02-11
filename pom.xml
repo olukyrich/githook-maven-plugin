@@ -10,6 +10,14 @@
     <name>Git Hook Plugin</name>
     <description>Maven plugin to configure and install local git hooks</description>
     <url>https://github.com/olukyrich/githook-maven-plugin</url>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>org.apache.maven</groupId>
