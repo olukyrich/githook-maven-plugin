@@ -9,6 +9,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 
 import static java.nio.file.StandardOpenOption.*;
@@ -68,6 +69,8 @@ public final class GitHookInstallMojo extends AbstractMojo {
 
             try {
                 finalScript = Files.lines(hookFilePath).collect(Collectors.joining("\n"));
+                Files.write(HOOK_DIR_PATH.resolve(hookName), finalScript.getBytes(), CREATE, TRUNCATE_EXISTING);
+                Files.setPosixFilePermissions(HOOK_DIR_PATH.resolve(hookName), PosixFilePermissions.fromString("rwxr-xr-x"));
             } catch (IOException e) {
                 throw new MojoExecutionException("could not access hook resource : " + hookFilePath, e);
             }
