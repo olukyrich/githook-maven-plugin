@@ -13,6 +13,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 
 import static java.nio.file.StandardOpenOption.*;
+
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,10 +45,8 @@ public final class GitHookInstallMojo extends AbstractMojo {
         }
         for (Map.Entry<String, String> hook : inlineHooks.entrySet()) {
             String hookName = hook.getKey();
-            String finalScript = SHEBANG + '\n' + hook.getValue();
-
             getLog().info("Generating " + hookName + " from maven conf");
-            generateHookFile(hookName, finalScript);
+            generateHookFile(hookName, SHEBANG + '\n' + hook.getValue());
         }
     }
 
@@ -64,26 +63,31 @@ public final class GitHookInstallMojo extends AbstractMojo {
             if (!hookFilePath.toAbsolutePath().startsWith(local.toAbsolutePath())) {
                 throw new MojoExecutionException("only file inside the project can be used to generate git hooks");
             }
-
-            String finalScript;
-
             try {
-                finalScript = Files.lines(hookFilePath).collect(Collectors.joining("\n"));
-                Files.write(HOOK_DIR_PATH.resolve(hookName), finalScript.getBytes(), CREATE, TRUNCATE_EXISTING);
-                Files.setPosixFilePermissions(HOOK_DIR_PATH.resolve(hookName), PosixFilePermissions.fromString("rwxr-xr-x"));
+                getLog().info("Generating " + hookName + " from " + hookFilePath.toString());
+                generateHookFile(hookName, Files.lines(hookFilePath).collect(Collectors.joining("\n")));
             } catch (IOException e) {
                 throw new MojoExecutionException("could not access hook resource : " + hookFilePath, e);
             }
-
-            getLog().info("Generating " + hookName + " from " + hookFilePath.toString());
-            generateHookFile(hookName, finalScript);
         }
     }
 
     protected void generateHookFile(String hookName, String asStringScript) throws MojoExecutionException {
         try {
-            Files.write(HOOK_DIR_PATH.resolve(hookName), asStringScript.getBytes(), CREATE, TRUNCATE_EXISTING);
-            Files.setPosixFilePermissions(HOOK_DIR_PATH.resolve(hookName), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE)));
+            Path path = HOOK_DIR_PATH.resolve(hookName);
+            Files.write(
+                    path,
+                    asStringScript.getBytes(),
+                    CREATE, TRUNCATE_EXISTING
+            );
+            Files.setPosixFilePermissions(
+                    path,
+                    new HashSet<>(Arrays.asList(
+                            PosixFilePermission.OWNER_EXECUTE,
+                            PosixFilePermission.OWNER_READ,
+                            PosixFilePermission.OWNER_WRITE
+                    ))
+            );
         } catch (IOException e) {
             throw new MojoExecutionException("could not write hook with name : " + hookName, e);
         }
